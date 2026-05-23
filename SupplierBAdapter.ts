@@ -1,64 +1,51 @@
-import { ISupplierAdapter, SupplierValidationResult } from '../ISupplierAdapter';
-import { SupplierConnection } from '../../../types/index';
+import { BaseAdapter } from './BaseAdapter';
+import { 
+  SupplierResponse, 
+  SupplierBalance, 
+  SupplierOrderResult, 
+  SupplierStatus,
+  Decimal
+} from '../types';
 
-export class SupplierBAdapter implements ISupplierAdapter {
-  id = 'supplier-b';
-  name = 'SupplierB Global Nexus';
+export class SupplierBAdapter extends BaseAdapter {
+  name = 'SupplierB';
 
-  async validateCredentials(credentials: Partial<SupplierConnection>): Promise<SupplierValidationResult> {
-    await new Promise(resolve => setTimeout(resolve, 800));
-
-    if (credentials.apiKey === 'SUPPLY_DEMO_B_KEY') {
-      return { 
-        isValid: true, 
-        message: 'Enterprise-grade credential verification success.',
-        metadata: { region: 'EU-WEST', tier: 'PRIVATE_POOL' } 
-      };
-    }
-
-    return { 
-      isValid: true, 
-      message: 'Node synchronized with global distributor.',
-      metadata: { region: 'AUTO-SCALE' }
+  async syncBalance(): Promise<SupplierResponse<SupplierBalance>> {
+    return {
+      success: true,
+      data: {
+        amount: new Decimal('2500000.00'),
+        currency: 'IDR'
+      }
     };
   }
 
-  async syncData(connection: SupplierConnection): Promise<void> {
-    console.log(`[SupplierB] Synchronizing resource pool v4.2...`);
-    await new Promise(resolve => setTimeout(resolve, 1200));
-  }
-
-  async getProducts(connection: SupplierConnection): Promise<any[]> {
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    return [
-      {
-        externalId: 'SB_VAL_100',
-        name: 'Valorant 100 Points (EU)',
-        category: 'Valorant',
-        type: 'Point',
-        rate: 15000,
-        min: 1,
-        max: 50,
-        description: 'Direct distribution for Valorant Points'
-      },
-      {
-        externalId: 'SB_PUBGM_UC_60',
-        name: 'PUBG Mobile 60 UC',
-        category: 'PUBG Mobile',
-        type: 'Currency',
-        rate: 12000,
-        min: 1,
-        max: 100,
-        description: 'Tier-1 global UC supply channel'
-      }
-    ];
-  }
-
-  async placeOrder(connection: SupplierConnection, product: any, quantity: number, targetUrl: string): Promise<{ externalOrderId: string }> {
-    await new Promise(resolve => setTimeout(resolve, 2000));
+  async createOrder(params: any): Promise<SupplierResponse<SupplierOrderResult>> {
+    console.log(`[${this.name}] Processing premium order for ${params.productCode}`);
     return {
-      externalOrderId: `SB_DIST_TX_${Math.random().toString(36).substring(7).toUpperCase()}`
+      success: true,
+      data: {
+        supplierOrderId: `SB_${Date.now()}`,
+        status: SupplierStatus.PENDING,
+        rawResponse: { priority: 'high' }
+      }
+    };
+  }
+
+  async checkStatus(supplierOrderId: string): Promise<SupplierResponse<SupplierStatus>> {
+    return {
+      success: true,
+      data: SupplierStatus.COMPLETED
+    };
+  }
+
+  async getProducts(): Promise<SupplierResponse<any[]>> {
+    return {
+      success: true,
+      data: [
+        { externalId: 'GEN_50', name: 'Genshin 50 Genesis', category: 'Genshin Impact', type: 'Genesis', rate: 12500, status: 'ACTIVE' },
+        { externalId: 'GEN_300', name: 'Genshin 300 Genesis', category: 'Genshin Impact', type: 'Genesis', rate: 75000, status: 'ACTIVE' }
+      ]
     };
   }
 }

@@ -1,64 +1,51 @@
-import { ISupplierAdapter, SupplierValidationResult } from '../ISupplierAdapter';
-import { SupplierConnection } from '../../../types/index';
+import { BaseAdapter } from './BaseAdapter';
+import { 
+  SupplierResponse, 
+  SupplierBalance, 
+  SupplierOrderResult, 
+  SupplierStatus,
+  Decimal
+} from '../types';
 
-export class SupplierCAdapter implements ISupplierAdapter {
-  id = 'supplier-c';
-  name = 'SupplierC Global Nexus';
+export class SupplierCAdapter extends BaseAdapter {
+  name = 'SupplierC';
 
-  async validateCredentials(credentials: Partial<SupplierConnection>): Promise<SupplierValidationResult> {
-    await new Promise(resolve => setTimeout(resolve, 900));
-
-    if (credentials.apiKey === 'SUPPLY_DEMO_C_KEY') {
-      return { 
-        isValid: true, 
-        message: 'Global infrastructure node handshake complete.',
-        metadata: { region: 'AS-PACIFIC', tier: 'ENTERPRISE_CORE' } 
-      };
-    }
-
-    return { 
-      isValid: true, 
-      message: 'Nexus node authenticated and active.',
-      metadata: { region: 'OPTIMIZED' }
+  async syncBalance(): Promise<SupplierResponse<SupplierBalance>> {
+    return {
+      success: true,
+      data: {
+        amount: new Decimal('500000.00'),
+        currency: 'IDR'
+      }
     };
   }
 
-  async syncData(connection: SupplierConnection): Promise<void> {
-    console.log(`[SupplierC] Synchronizing multi-tenant distribution clusters...`);
-    await new Promise(resolve => setTimeout(resolve, 1400));
-  }
-
-  async getProducts(connection: SupplierConnection): Promise<any[]> {
-    await new Promise(resolve => setTimeout(resolve, 1200));
-    
-    return [
-      {
-        externalId: 'SC_ROBLOX_800',
-        name: 'Roblox 800 Robux',
-        category: 'Roblox',
-        type: 'Gift Card',
-        rate: 150000,
-        min: 1,
-        max: 20,
-        description: 'Elite-tier Roblox asset distribution'
-      },
-      {
-        externalId: 'SC_STEAM_5USD',
-        name: 'Steam Wallet $5 USD',
-        category: 'Steam',
-        type: 'Gift Card',
-        rate: 82000,
-        min: 1,
-        max: 50,
-        description: 'High-liquidity Steam wallet credit'
-      }
-    ];
-  }
-
-  async placeOrder(connection: SupplierConnection, product: any, quantity: number, targetUrl: string): Promise<{ externalOrderId: string }> {
-    await new Promise(resolve => setTimeout(resolve, 2500));
+  async createOrder(params: any): Promise<SupplierResponse<SupplierOrderResult>> {
+    console.log(`[${this.name}] Fallback order executing for ${params.orderId}`);
     return {
-      externalOrderId: `SC_GLOBAL_TX_${Math.random().toString(36).substring(7).toUpperCase()}`
+      success: true,
+      data: {
+        supplierOrderId: `SC_${Math.floor(Math.random() * 1000000)}`,
+        status: SupplierStatus.PROCESSING,
+        rawResponse: { mode: 'economy' }
+      }
+    };
+  }
+
+  async checkStatus(supplierOrderId: string): Promise<SupplierResponse<SupplierStatus>> {
+    return {
+      success: true,
+      data: SupplierStatus.COMPLETED
+    };
+  }
+
+  async getProducts(): Promise<SupplierResponse<any[]>> {
+    return {
+      success: true,
+      data: [
+        { externalId: 'ST_60', name: 'Steam Wallet $5', category: 'Steam', type: 'Wallet', rate: 82000, status: 'ACTIVE' },
+        { externalId: 'ST_120', name: 'Steam Wallet $10', category: 'Steam', type: 'Wallet', rate: 164000, status: 'ACTIVE' }
+      ]
     };
   }
 }

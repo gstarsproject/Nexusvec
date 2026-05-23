@@ -1,16 +1,23 @@
-import { SupplierConnection } from '../../types/index';
-
-export interface SupplierValidationResult {
-  isValid: boolean;
-  message?: string;
-  metadata?: any;
+export interface ProviderResponse<T = any> {
+  success: boolean;
+  data?: T;
+  providerCode?: string;
+  providerMessage?: string;
+  originalPayload?: any;
 }
 
 export interface ISupplierAdapter {
-  id: string;
-  name: string;
-  validateCredentials(credentials: Partial<SupplierConnection>): Promise<SupplierValidationResult>;
-  syncData(connection: SupplierConnection): Promise<any>;
-  getProducts?(connection: SupplierConnection): Promise<any[]>;
-  placeOrder?(connection: SupplierConnection, product: any, quantity: number, targetUrl: string): Promise<{ externalOrderId: string }>;
+  providerName: string;
+  checkBalance(): Promise<ProviderResponse<{ balance: number }>>;
+  fetchCatalog(): Promise<ProviderResponse<any[]>>;
+  placeOrder(sku: string, target: string, refId: string): Promise<ProviderResponse<{ 
+    status: 'SUCCESS' | 'PENDING' | 'FAILED',
+    providerRef: string,
+    sn?: string 
+  }>>;
+  checkOrderStatus(refId: string): Promise<ProviderResponse<{ 
+    status: 'SUCCESS' | 'PENDING' | 'FAILED',
+    providerRef: string,
+    sn?: string 
+  }>>;
 }

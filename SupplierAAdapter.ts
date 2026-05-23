@@ -1,70 +1,68 @@
-import { ISupplierAdapter, SupplierValidationResult } from '../ISupplierAdapter';
-import { SupplierConnection } from '../../../types/index';
+import { BaseAdapter } from './BaseAdapter';
+import { 
+  SupplierResponse, 
+  SupplierBalance, 
+  SupplierOrderResult, 
+  SupplierStatus,
+  Decimal
+} from '../types';
 
-export class SupplierAAdapter implements ISupplierAdapter {
-  id = 'supplier-a';
-  name = 'SupplierA Alpha Node';
+export class SupplierAAdapter extends BaseAdapter {
+  name = 'SupplierA';
 
-  async validateCredentials(credentials: Partial<SupplierConnection>): Promise<SupplierValidationResult> {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 600));
-
-    // Mock credentials check
-    if (credentials.apiKey === 'SUPPLY_DEMO_KEY') {
-      return { 
-        isValid: true, 
-        message: 'Mock authentication successful.',
-        metadata: { region: 'US-EAST' } 
+  async syncBalance(): Promise<SupplierResponse<SupplierBalance>> {
+    return this.withRetry(async () => {
+      // Simulate API call
+      console.log(`[${this.name}] Fetching balance for ${this.config.apiKey.substring(0, 5)}...`);
+      return {
+        success: true,
+        data: {
+          amount: new Decimal('1500000.00'),
+          currency: 'IDR'
+        }
       };
-    }
+    });
+  }
 
-    if (!credentials.apiKey) {
-      return { isValid: false, message: 'SupplierA requires an API Key.' };
-    }
+  async createOrder(params: {
+    productCode: string;
+    target: string;
+    quantity: number;
+    amount: number;
+    orderId: string;
+  }): Promise<SupplierResponse<SupplierOrderResult>> {
+    return this.withRetry(async () => {
+      console.log(`[${this.name}] Placing order for ${params.productCode} to ${params.target}`);
+      
+      // Simulate potential failure for retry demonstration
+      if (Math.random() < 0.1) throw new Error('Network Timeout');
 
-    return { 
-      isValid: true, 
-      message: 'Connection established.',
-      metadata: { region: 'AUTO-SELECT' }
+      return {
+        success: true,
+        data: {
+          supplierOrderId: `SA_${Math.random().toString(36).substring(7).toUpperCase()}`,
+          status: SupplierStatus.PROCESSING,
+          rawResponse: { message: 'Order received' }
+        }
+      };
+    });
+  }
+
+  async checkStatus(supplierOrderId: string): Promise<SupplierResponse<SupplierStatus>> {
+    return {
+      success: true,
+      data: SupplierStatus.COMPLETED
     };
   }
 
-  async syncData(connection: SupplierConnection): Promise<void> {
-    console.log(`[SupplierA] Syncing clusters...`);
-    await new Promise(resolve => setTimeout(resolve, 1000));
-  }
-
-  async getProducts(connection: SupplierConnection): Promise<any[]> {
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
-    return [
-      {
-        externalId: 'SA_ML_50',
-        name: 'Mobile Legends 50 Diamonds',
-        category: 'Mobile Legends',
-        type: 'Diamond',
-        rate: 7000,
-        min: 1,
-        max: 10,
-        description: 'Quick top-up for Mobile Legends'
-      },
-      {
-        externalId: 'SA_FF_70',
-        name: 'Free Fire 70 Diamonds',
-        category: 'Free Fire',
-        type: 'Diamond',
-        rate: 9000,
-        min: 1,
-        max: 10,
-        description: 'Instant Free Fire diamonds'
-      }
-    ];
-  }
-
-  async placeOrder(connection: SupplierConnection, product: any, quantity: number, targetUrl: string): Promise<{ externalOrderId: string }> {
-    await new Promise(resolve => setTimeout(resolve, 1500));
+  async getProducts(): Promise<SupplierResponse<any[]>> {
     return {
-      externalOrderId: `SA_TX_${Math.random().toString(36).substring(7).toUpperCase()}`
+      success: true,
+      data: [
+        { externalId: 'ML_100', name: 'Mobile Legends 100 Diamonds', category: 'Mobile Legends', type: 'Diamond', rate: 14000, status: 'ACTIVE' },
+        { externalId: 'FF_140', name: 'Free Fire 140 Diamonds', category: 'Free Fire', type: 'Diamond', rate: 18500, status: 'ACTIVE' },
+        { externalId: 'VAL_625', name: 'Valorant 625 Points', category: 'Valorant', type: 'Points', rate: 58000, status: 'ACTIVE' }
+      ]
     };
   }
 }
