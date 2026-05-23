@@ -1,0 +1,2 @@
+export const handleFirestoreError = (err: any, type?: any, doc?: any) => { console.error(err); return err; };
+export enum OperationType { GET = 'GET', WRITE = 'WRITE', LIST = 'LIST', CREATE = 'CREATE', UPDATE = 'UPDATE', DELETE = 'DELETE' }

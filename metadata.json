@@ -1,0 +1,8 @@
+{
+  "name": "NexusCore: Enterprise Digital Monetization Infrastructure",
+  "description": "Premium white-label SaaS infrastructure for digital recharge, wallet economies, and creator monetization. Enterprise-grade financial ledger and multi-tenant reseller ecosystem.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
