@@ -1,0 +1,15 @@
+{
+  "alerts_title": "全局智能调度与告警面板",
+  "path_advisory": "智能应急避障路由接管通知",
+  "ledger_resolved": "共识账本实时对账完成",
+  "settlement_verified": "结算已核验完成",
+  "fulfillment_completed": "订单履约已达成",
+  "supplier_latency_spike": "监测到上游供货商延迟异常跳变",
+  "routing_optimized": "自适应路由寻址策略已优化",
+  "escrow_synchronized": "信托准备金已完成自动对账同步",
+  "retry_queue_executed": "事务重试队列执行完毕",
+  "provider_node_recovered": "服务商供应节点已恢复连接",
+  "regional_traffic_spike": "监测到区域流量异常性激增",
+  "payment_gateway_reconnected": "支付网关主备链路重连成功",
+  "event_verified": "共识账本密码学哈希指纹校验一致"
+}

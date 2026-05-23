@@ -1,0 +1,6 @@
+{
+  "api_grid": "上游分发商 SLA 品质方阵",
+  "fiber_diagnostics": "直连网络通信纤路线路诊断",
+  "endpoint_latency": "直连终点单双向时延",
+  "probe_gateway": "主备网关快速可用性扫描"
+}

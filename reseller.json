@@ -1,0 +1,7 @@
+{
+  "title": "分销商网络业务透视",
+  "active_groups": "活动账户集群",
+  "payout_gmv": "累计已分发清算 GMV",
+  "reseller_matrix": "分销渠道网络管控",
+  "reseller_desc": "配置底价浮动阶梯，托管下级账户鉴权密钥并审查交易频次度量。"
+}

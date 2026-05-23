@@ -1,0 +1,6 @@
+{
+  "system_config": "全局系统核心参数配置",
+  "node_settings": "单独微节点性能配额",
+  "security_policy": "安全风控与多因子准入策略",
+  "audit_logs": "系统日志审计与链上存证"
+}

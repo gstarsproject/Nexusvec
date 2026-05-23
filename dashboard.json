@@ -1,0 +1,14 @@
+{
+  "title": "全局生态运营指挥中心大屏",
+  "subtitle": "主权数字基础设施操作系统。管理全球分发结算、API 智能路由寻址、下游渠道授信保证金存管以及隔离式白标系统微集群。",
+  "welcome_back": "欢迎回来，系统核心管理员。以下是您今日的全局实时业务概览。",
+  "welcome": "欢迎回来，核心执行管理员。",
+  "stats_gmv": "滚动 24小时 实时结算 GMV",
+  "stats_tenants": "已注册活动边缘租户组",
+  "stats_sla": "聚合上游分发通道 SLA",
+  "stats_velocity": "核心引擎实时路由速率",
+  "stats_reserves": "受控信托准备金总和",
+  "active_perspective": "多租户权限沙盘模拟器",
+  "perspective_desc": "选择并模拟特定的组织节点以核验下挂资源权限隔离。",
+  "exit_simulation": "还原账户核心角色"
+}

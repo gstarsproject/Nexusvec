@@ -1,0 +1,281 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Tenant {
+  id               String               @id @default(uuid())
+  name             String
+  slug             String               @unique
+  email            String               @unique
+  status           SystemStatus         @default(ACTIVE)
+  logoUrl          String?
+  primaryColor     String?              @default("#9333ea")
+  customDomain     String?              @unique
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+  auditLogs        AuditLog[]
+  orders           Order[]
+  products         Product[]
+  resellers        Reseller[]
+  suppliers        SupplierConnection[]
+  users            User[]
+  wallets          Wallet[]
+  transactions     WalletTransaction[]
+  ledgerEntries    LedgerEntry[]
+  payouts          PayoutHistory[]
+  whiteLabelConfig WhiteLabelConfig?
+  PaymentGateway   PaymentGateway[]
+}
+
+model WhiteLabelConfig {
+  id              String  @id @default(uuid())
+  tenantId        String  @unique
+  siteTitle       String?
+  supportTelegram String?
+  termsUrl        String?
+  footerText      String?
+  isEnabled       Boolean @default(true)
+  tenant          Tenant  @relation(fields: [tenantId], references: [id])
+}
+
+model User {
+  id              String     @id @default(uuid())
+  email           String     @unique
+  passwordHash    String?
+  role            Role       @default(MEMBER)
+  tenantId        String
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  auditLogs       AuditLog[]
+  resellerProfile Reseller?
+  sessions        Session[]
+  tenant          Tenant     @relation(fields: [tenantId], references: [id])
+}
+
+model Session {
+  id           String   @id @default(uuid())
+  userId       String
+  refreshToken String   @unique
+  deviceInfo   String?
+  ipAddress    String?
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+  user         User     @relation(fields: [userId], references: [id])
+}
+
+model Wallet {
+  id             String              @id @default(uuid())
+  ownerId        String              @unique
+  tenantId       String
+  balance        Decimal             @default(0) @db.Decimal(20, 2)
+  pendingBalance Decimal             @default(0) @db.Decimal(20, 2)
+  frozenBalance  Decimal             @default(0) @db.Decimal(20, 2)
+  currency       String              @default("IDR")
+  updatedAt      DateTime            @updatedAt
+  tenant         Tenant              @relation(fields: [tenantId], references: [id])
+  transactions   WalletTransaction[]
+  ledgerEntries  LedgerEntry[]
+}
+
+model WalletTransaction {
+  id          String            @id @default(uuid())
+  walletId    String
+  tenantId    String
+  amount      Decimal           @db.Decimal(20, 2)
+  type        TransactionType
+  status      TransactionStatus @default(COMPLETED)
+  description String?
+  referenceId String?
+  metadata    Json?
+  createdAt   DateTime          @default(now())
+  tenant      Tenant            @relation(fields: [tenantId], references: [id])
+  wallet      Wallet            @relation(fields: [walletId], references: [id])
+}
+
+model Reseller {
+  id           String     @id @default(uuid())
+  userId       String     @unique
+  tenantId     String
+  parentId     String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  orders       Order[]
+  payouts      PayoutHistory[]
+  parent       Reseller?  @relation("Hierarchy", fields: [parentId], references: [id])
+  subResellers Reseller[] @relation("Hierarchy")
+  tenant       Tenant     @relation(fields: [tenantId], references: [id])
+  user         User       @relation(fields: [userId], references: [id])
+}
+
+model SupplierConnection {
+  id        String    @id @default(uuid())
+  tenantId  String
+  name      String
+  type      String
+  apiUrl    String
+  apiKey    String
+  status    String    @default("ACTIVE")
+  createdAt DateTime  @default(now())
+  products  Product[]
+  tenant    Tenant    @relation(fields: [tenantId], references: [id])
+}
+
+model PaymentGateway {
+  id           String   @id @default(uuid())
+  tenantId     String
+  providerName String
+  merchantId   String
+  apiKey       String
+  clientKey    String?
+  status       String   @default("LIVE")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  tenant       Tenant   @relation(fields: [tenantId], references: [id])
+}
+
+model Product {
+  id           String             @id @default(uuid())
+  tenantId     String
+  supplierId   String
+  name         String
+  category     String
+  productCode  String
+  description  String?
+  baseCost     Decimal            @db.Decimal(20, 2)
+  salePrice    Decimal            @db.Decimal(20, 2)
+  isEnabled    Boolean            @default(true)
+  orders       Order[]
+  pricingRules PricingRule[]
+  supplier     SupplierConnection @relation(fields: [supplierId], references: [id])
+  tenant       Tenant             @relation(fields: [tenantId], references: [id])
+}
+
+model PricingRule {
+  id          String     @id @default(uuid())
+  productId   String
+  role        Role
+  markupType  MarkupType
+  markupValue Decimal    @db.Decimal(20, 2)
+  product     Product    @relation(fields: [productId], references: [id])
+}
+
+model Order {
+  id              String         @id @default(uuid())
+  resellerId      String
+  tenantId        String
+  productId       String
+  target          String
+  quantity        Int            @default(1)
+  costPrice       Decimal        @db.Decimal(20, 2)
+  totalPrice      Decimal        @db.Decimal(20, 2)
+  status          OrderStatus    @default(PENDING)
+  supplierOrderId String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  product         Product        @relation(fields: [productId], references: [id])
+  reseller        Reseller       @relation(fields: [resellerId], references: [id])
+  tenant          Tenant         @relation(fields: [tenantId], references: [id])
+  history         OrderHistory[]
+}
+
+model OrderHistory {
+  id        String      @id @default(uuid())
+  orderId   String
+  status    OrderStatus
+  note      String?
+  createdAt DateTime    @default(now())
+  order     Order       @relation(fields: [orderId], references: [id])
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  tenantId   String
+  userId     String?
+  action     String
+  entityType String?
+  entityId   String?
+  details    Json?
+  ipAddress  String?
+  severity   String   @default("INFO")
+  createdAt  DateTime @default(now())
+  tenant     Tenant   @relation(fields: [tenantId], references: [id])
+  user       User?    @relation(fields: [userId], references: [id])
+}
+
+model LedgerEntry {
+  id              String   @id @default(uuid())
+  tenantId        String
+  transactionId   String   @unique
+  walletId        String
+  type            TransactionType
+  amount          Decimal  @db.Decimal(20, 2)
+  balanceBefore   Decimal  @db.Decimal(20, 2)
+  balanceAfter    Decimal  @db.Decimal(20, 2)
+  description     String?
+  referenceId     String?
+  createdAt       DateTime @default(now())
+  tenant          Tenant   @relation(fields: [tenantId], references: [id])
+  wallet          Wallet   @relation(fields: [walletId], references: [id])
+}
+
+model PayoutHistory {
+  id              String   @id @default(uuid())
+  tenantId        String
+  resellerId      String
+  amount          Decimal  @db.Decimal(20, 2)
+  status          TransactionStatus @default(PENDING)
+  bankDetails     Json?
+  referenceId     String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  tenant          Tenant   @relation(fields: [tenantId], references: [id])
+  reseller        Reseller @relation(fields: [resellerId], references: [id])
+}
+
+
+enum Role {
+  SUPER_OWNER
+  TENANT_OWNER
+  ADMIN
+  RESELLER
+  MEMBER
+  SUPPLIER
+  CUSTOMER
+}
+
+enum SystemStatus {
+  ACTIVE
+  SUSPENDED
+  MAINTENANCE
+}
+
+enum TransactionType {
+  DEBIT
+  CREDIT
+}
+
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  CANCELLED
+  FAILED
+}
+
+enum MarkupType {
+  PERCENTAGE
+  FIXED
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  PARTIAL
+  REFUNDED
+  CANCELLED
+}

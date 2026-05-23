@@ -1,0 +1,16 @@
+{
+  "clearing_vol": "通道结算清算总量监测",
+  "clearing_desc": "全球多中心实时处理的按小时充值卡券成交和息差利润收益率汇总。",
+  "reconciled_ok": "账目实时核对无误",
+  "escrow_balancer": "上游分发保证金智能配额分配滑块",
+  "escrow_desc": "调节并分配各家批发分发商账户中的保证金沉淀。实时平衡以实现时延和利益最大化的寻址配额。",
+  "digiflazz_pool": "DIGIFLAZZ 准备金存管池",
+  "codashop_pool": "CODASHOP APAC 渠道保证金",
+  "sla_minimum": "服务商限定最低合规授信额",
+  "min_alloc": "最小配额",
+  "max_alloc": "最大配额",
+  "total_escrow_reserves": "全局受控流动性保证金余额",
+  "settlement_velocity": "单笔秒级对账时效",
+  "margin_impact": "通道套利动态边际增益",
+  "sla_probability": "链路违约风险敞口度量"
+}
